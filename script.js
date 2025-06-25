@@ -19,7 +19,6 @@ async function initializeApp() {
             fetchBookmarks().catch(() => [])
         ]);
         
-        
         // Display headline if available
         if (headlineBookmarks.length > 0) {
             displayHeadline(headlineBookmarks[0]);
@@ -58,7 +57,6 @@ function createASCIIAnimation(x, y) {
     setTimeout(() => element.remove(), 800);
 }
 
-
 function setupAnimatedCursor() {
     const cursor = document.createElement('div');
     cursor.className = 'animated-cursor';
@@ -86,7 +84,6 @@ function setupAnimatedCursor() {
     }, 300);
 }
 
-
 function showEmptyState() {
     const bookmarksList = document.getElementById('bookmarks-list');
     bookmarksList.innerHTML = `
@@ -107,7 +104,8 @@ function showErrorState() {
 async function fetchCollections() {
     try {
         const token = RAINDROP_CONFIG.TEST_TOKEN;
-        const response = await fetch(`${RAINDROP_CONFIG.BASE_URL}/collections`, {
+        // Fetch up to 100 collections to ensure none are paginated out
+        const resp = await fetch(`${RAINDROP_CONFIG.BASE_URL}/collections?perpage=100`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -115,11 +113,14 @@ async function fetchCollections() {
             }
         });
         
-        if (!response.ok) {
-            throw new Error(`Collections request failed: ${response.status} ${response.statusText}`);
+        if (!resp.ok) {
+            throw new Error(`Collections request failed: ${resp.status} ${resp.statusText}`);
         }
         
-        const data = await response.json();
+        const data = await resp.json();
+        // Debug: log all collection titles to verify what we're seeing
+        console.log('Fetched collections:', data.items.map(c => c.title));
+        
         return data.items;
     } catch (error) {
         console.error('Error fetching collections:', error);
@@ -163,12 +164,11 @@ async function fetchHeadlineBookmarks() {
     }
 }
 
-
 async function fetchBookmarks() {
     try {
         console.log('┌─ Fetching bookmarks from Shared collection ─┐');
         
-        // First get collections to find "Linkity Link"
+        // First get collections to find "Shared"
         const collections = await fetchCollections();
         const linkityCollection = collections.find(col => col.title === 'Shared');
         
@@ -212,11 +212,9 @@ async function fetchBookmarks() {
             return JSON.parse(cachedBookmarks);
         }
         
-        // Return empty array if no cache
         return [];
     }
 }
-
 
 function displayHeadline(headlineBookmark) {
     const headlineSection = document.getElementById('headline-link');
@@ -231,8 +229,6 @@ function displayBookmarks(bookmarks) {
         showEmptyState();
         return;
     }
-
-    // Distribute all bookmarks across three columns
     distributeBookmarksToColumns(bookmarks);
 }
 
@@ -242,18 +238,12 @@ function distributeBookmarksToColumns(bookmarks) {
         document.getElementById('column-2'),
         document.getElementById('column-3')
     ];
-
-    // Clear columns
     columns.forEach(column => column.innerHTML = '');
-
-    // Calculate items per column for sequential distribution
     const itemsPerColumn = Math.ceil(bookmarks.length / 3);
     
     bookmarks.forEach((bookmark, index) => {
-        // Determine which column based on sequential order (fill column 1, then 2, then 3)
         const columnIndex = Math.floor(index / itemsPerColumn);
-        const targetColumn = columns[Math.min(columnIndex, 2)]; // Ensure we don't exceed 3 columns
-        
+        const targetColumn = columns[Math.min(columnIndex, 2)];
         const newsItem = createNewsItem(bookmark);
         targetColumn.appendChild(newsItem);
     });
@@ -263,7 +253,6 @@ function createNewsItem(bookmark) {
     const domain = getDomain(bookmark.link);
     const faviconUrl = getFaviconUrl(bookmark.link);
     const summary = bookmark.note || bookmark.excerpt || '';
-
     const newsItem = document.createElement('div');
     newsItem.className = 'news-item';
     newsItem.innerHTML = `
@@ -278,7 +267,6 @@ function createNewsItem(bookmark) {
             </div>
         </div>
     `;
-
     return newsItem;
 }
 
@@ -286,7 +274,7 @@ function getDomain(url) {
     try {
         const urlObj = new URL(url);
         return urlObj.hostname.replace('www.', '');
-    } catch (e) {
+    } catch {
         return 'unknown';
     }
 }
@@ -295,21 +283,16 @@ function getFaviconUrl(url) {
     try {
         const urlObj = new URL(url);
         return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=16`;
-    } catch (e) {
-        return 'data:image/gif;base64,R0lGODlhEAAQAIAAAAAAAP///yH5BAEAAAAALAAAAAAQABAAAAL+jI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2jef6zvf+DwwKh8Si8YhMKpfMpvMJjUqn1Kr1is1qt9yu9wsOi8fksvmMTqvX7Lb7DY/L5/S6/Y7P6/f8vv8PGCg4SFhoeIiYqLjI2Oj4CBkpOUlZaXmJmam5ydnp+QkaKjpKWmp6ipqqusra6voKGys7S1tre4ubq7vL2+v7CxwsPExcbHyMnKy8zNzs/AwdLT1NXW19jZ2tvc3d7f0NHi4+Tl5ufo6err7O3u7+Dh8vP09fb3+Pn6+/z9/v/w8woMCBBAsaPIgwocKFDBs6fAgxosSJFCtavIgxo8aN';
+    } catch {
+        return '';
     }
 }
 
 function formatDate(dateString) {
     const date = new Date(dateString);
-    const timeString = date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-    });
+    const timeString = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    
     return `at ${timeString} on ${year}-${month}-${day}`;
 }
