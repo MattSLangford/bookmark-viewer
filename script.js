@@ -166,16 +166,16 @@ async function fetchHeadlineBookmarks() {
 
 async function fetchBookmarks() {
     try {
-        console.log('┌─ Fetching bookmarks from Linkity Link collection ─┐');
+        console.log('┌─ Fetching bookmarks from Shared collection ─┐');
         
         // First get collections to find "Linkity Link"
         const collections = await fetchCollections();
-        const linkityCollection = collections.find(col => col.title === 'Linkity Link');
+        const linkityCollection = collections.find(col => col.title === 'Shared');
         
         let collectionId;
         if (!linkityCollection) {
-            console.log('└─ Linkity Link collection not found, using default ─┘');
-            // Fall back to default collection if Linkity Link not found
+            console.log('└─ Shared collection not found, using default ─┘');
+            // Fall back to default collection if Shared not found
             collectionId = RAINDROP_CONFIG.DEFAULT_COLLECTION;
         } else {
             collectionId = linkityCollection._id;
