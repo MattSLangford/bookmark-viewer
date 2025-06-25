@@ -114,7 +114,7 @@ async function fetchCollections() {
 async function fetchHeadlineBookmarks() {
     try {
         const collections = await fetchCollections();
-        const headlineCollection = collections.find(col => col.title === 'Linkity Link Headline');
+        const headlineCollection = collections.find(col => col.title === 'Headline');
         
         if (!headlineCollection) return [];
         
@@ -137,7 +137,7 @@ async function fetchHeadlineBookmarks() {
 async function fetchBookmarks() {
     try {
         const collections = await fetchCollections();
-        const linkityCollection = collections.find(col => col.title === 'Linkity Link');
+        const linkityCollection = collections.find(col => col.title === 'Shared');
         
         const collectionId = linkityCollection ? linkityCollection._id : RAINDROP_CONFIG.DEFAULT_COLLECTION;
         
