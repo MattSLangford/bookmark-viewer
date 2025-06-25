@@ -1,7 +1,7 @@
 // Raindrop.io API Configuration
 const RAINDROP_CONFIG = {
     // Test token for development
-    TEST_TOKEN: '28588c25-dec4-4966-afe1-9ce1f9c374ff',
+    TEST_TOKEN: '8d4c1be2-ed26-44eb-acf6-d2d9c31c1c27',
     
     // API Endpoints
     BASE_URL: 'https://api.raindrop.io/rest/v1',
