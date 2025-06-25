@@ -131,12 +131,12 @@ async function fetchHeadlineBookmarks() {
     try {
         console.log('┌─ Fetching headline bookmarks ─┐');
         
-        // First get collections to find "Linkity Link Headline"
+        // First get collections to find "Headline"
         const collections = await fetchCollections();
-        const headlineCollection = collections.find(col => col.title === 'Linkity Link Headline');
+        const headlineCollection = collections.find(col => col.title === 'Headline');
         
         if (!headlineCollection) {
-            console.log('└─ Linkity Link Headline collection not found ─┘');
+            console.log('└─ Headline collection not found ─┘');
             return [];
         }
         
